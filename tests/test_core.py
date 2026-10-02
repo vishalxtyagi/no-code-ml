@@ -111,6 +111,9 @@ def test_zero_training_tier_reports_skip_or_runs(monkeypatch):
     monkeypatch.delenv("POCKETML_SKIP_FM")
     report, _ = core.evaluate(_clf_df(n=150), "label")
     tier1 = next(c for c in report["candidates"] if c["tier"] == 1)
+    monkeypatch.setenv("POCKETML_SKIP_FM", "1")
+    skipped = next(c for c in core.evaluate(_clf_df(n=150), "label")[0]["candidates"] if c["tier"] == 1)
+    assert skipped["skip_reason"] == "skipped by POCKETML_SKIP_FM"
     try:
         import tabicl  # noqa: F401
     except ImportError:

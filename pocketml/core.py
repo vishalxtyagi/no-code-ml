@@ -106,20 +106,21 @@ def _text_pipeline(num, cat, text, task):
 
 
 def _zero_training(num, cat, task):
-    """Tier 1: a tabular foundation model that predicts in-context, no gradient training. Optional extra."""
+    """Tier 1: a tabular foundation model that predicts in-context, no gradient training. Optional extra.
+    Returns (pipeline, None) or (None, reason it was skipped)."""
     if os.environ.get("POCKETML_SKIP_FM"):  # slow on CPU; tests and impatient users can opt out
-        return None
+        return None, "skipped by POCKETML_SKIP_FM"
     try:
         from tabicl import TabICLClassifier, TabICLRegressor
     except ImportError:
-        return None
+        return None, "not installed: pip install 'pocketml[fm]'"
     ct = ColumnTransformer(
         [("num", "passthrough", num),
          ("cat", make_pipeline(FunctionTransformer(_as_str), OrdinalEncoder(
              handle_unknown="use_encoded_value", unknown_value=-1)), cat)],
         sparse_threshold=0)
     est = TabICLClassifier() if task == "classification" else TabICLRegressor()
-    return Pipeline([("prep", ct), ("model", est)])
+    return Pipeline([("prep", ct), ("model", est)]), None
 
 
 def build_candidates(kinds, features, task):
@@ -129,10 +130,10 @@ def build_candidates(kinds, features, task):
     floor = DummyClassifier(strategy="prior") if task == "classification" else DummyRegressor()
     cands = [{"tier": 0, "name": "floor (always predict the most common / mean value)", "model": floor}]
     if num or cat:
-        fm = _zero_training(num, cat, task)
+        fm, skip_reason = _zero_training(num, cat, task)
         note = " (non-text columns only)" if text else ""
         cands.append({"tier": 1, "name": f"zero-training foundation model (TabICL){note}", "model": fm,
-                      "skip_reason": None if fm else "not installed: pip install 'pocketml[fm]'"})
+                      "skip_reason": skip_reason})
     else:
         cands.append({"tier": 1, "name": "zero-training model", "model": None,
                       "skip_reason": "text-only data: zero-training text models arrive in milestone 2"})

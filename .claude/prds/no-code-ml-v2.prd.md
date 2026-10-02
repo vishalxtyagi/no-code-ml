@@ -1,4 +1,4 @@
-# Tiny Models, Owned — "Replace your LLM call with a model you own, trained for free"
+# pocketml — "Replace your LLM call with a model you own, trained for free"
 <!-- Working title. Product name TBD (see Open Questions). Supersedes the earlier CSV-only AutoML draft. -->
 
 ## Problem
@@ -124,7 +124,7 @@ We'll know we're right when:
 
 | # | Milestone | Outcome | Status | Plan |
 |---|---|---|---|---|
-| 1 | Trustworthy tabular+text core | A user points the tool at a table or text dataset and gets a validity report, a zero-training baseline, and (only if better) a trained model, all on their own machine and with several runs not interfering. | pending | — |
+| 1 | Trustworthy tabular+text core | A user points the tool at a table or text dataset and gets a validity report, a zero-training baseline, and (only if better) a trained model, all on their own machine and with several runs not interfering. | complete | `.claude/plans/m1-core.plan.md` |
 | 2 | Replace my prompt | A user hands over an existing LLM prompt and a few examples and gets a small model plus a teacher-vs-owned report covering accuracy, cost and latency. | pending | — |
 | 3 | Own and run anywhere | Every result exports as a re-runnable notebook, a portable model, a local endpoint, and (for text) a browser-runnable build with a shareable demo page. | pending | — |
 | 4 | Free GPU, legitimately | Heavy steps can run on the user's own free notebook GPU session from their agent or the tool, within the providers' terms, with CPU fallback. | pending | — |
@@ -132,15 +132,27 @@ We'll know we're right when:
 | 6 | Launch | Open-source release, a "your $X/month LLM call → a 30 MB model" demo on public datasets, and launches on HN, Product Hunt and others. Judged on parity and activation metrics, not rank. | pending | — |
 
 ## Open Questions
-- [ ] **Kaggle API for third-party tools:** may a third-party tool submit runs to a user's Kaggle GPU quota on their behalf? Validate by reading the Kaggle ToS and API terms.
-- [ ] **Colab path:** the official Colab MCP server needs a local agent and the user's open browser session, and supports specific agent clients. Is that UX acceptable for milestone 4, or is "open this notebook in Colab with one click" enough? Validate with a prototype.
-- [ ] **Licensing of the best no-training models:** the strongest tabular foundation model's open weights are non-commercial ([Prior Labs](https://docs.priorlabs.ai/models)). Which permissively licensed alternatives are good enough? Does the product's own license allow commercial users? Validate via a license review and a benchmark.
-- [ ] **Teacher LLM cost and terms:** the user brings their own key. Do major LLM providers' terms allow using outputs to train a competing or replacement model for the user's own use? Validate via a ToS review per provider.
-- [ ] **Differentiation vs distil labs and Plexe:** is local-first plus free compute plus any-data enough of an edge, or do we need a sharper wedge such as browser-runnable models? Validate via a competitive teardown and user interviews.
-- [ ] Minimum example counts and dataset size limits for the MVP.
-- [ ] Should the primary interface be the user's AI coding agent, a CLI, or a local web UI? Validate via prototype tests with target users.
-- [ ] Product name. "no-code-ml" mis-signals the developer audience.
-- [ ] Should we build on the unmerged Copilot rewrite branch or start fresh? Decide in `/plan`.
+- [x] **Kaggle API for third-party tools.** *Resolved 2026-10-03.*
+  - A **local** tool running with the user's own Kaggle credentials (`kaggle auth login` or an API token) is ordinary first-party API use.
+  - A **hosted** product acting for users would need Kaggle's OAuth 2.0 + PKCE flow, with a client ID issued by the Kaggle team.
+  - Scraping or crawling is prohibited ([Kaggle API docs](https://www.kaggle.com/docs/api), [kaggle-cli auth](https://github.com/Kaggle/kaggle-cli/blob/main/docs/README.md)).
+  - → Milestone 4 stays local-first. Request an OAuth client only if a hosted mode is ever built.
+- [x] **Teacher LLM terms.** *Resolved 2026-10-03; re-check before launch.*
+  - **Anthropic** explicitly **permits** training non-competing task-specific models: classification, extraction, sentiment, categorization, semantic search, anomaly detection. It forbids chatbots and open-ended generation ([Claude support](https://support.claude.com/en/articles/12326764-can-i-use-my-outputs-to-train-an-ai-model)).
+  - **OpenAI** forbids competing models, with a "Permitted Exception" for classifiers and embeddings *not distributed or made commercially available to third parties*. Per the [Services Agreement](https://openai.com/policies/services-agreement/); the page returned 403 to automated fetch, so verify the wording by hand.
+  - **Gemini API** forbids using the Services "to develop models that compete with the Services" ([Gemini API terms](https://ai.google.dev/gemini-api/terms)). It's unclear whether a replacement classifier counts.
+  - → Milestone 2 scope:
+    1. Restrict "replace my prompt" to classification and extraction tasks. Never generative or chat.
+    2. Default the teacher to an **open-weight model** (Apache-2.0-class licence), with no output restrictions.
+    3. Show a per-provider terms notice when the user picks a hosted teacher. Models trained from OpenAI outputs are flagged "internal use only, don't redistribute".
+- [ ] **Colab path** (blocks milestone 4; **needs:** a prototype): the official Colab MCP server needs a local agent and the user's open browser session, and supports specific agent clients. Is that UX acceptable for milestone 4, or is "open this notebook in Colab with one click" enough? Validate with a prototype.
+- [x] **Licensing of the best no-training models.** *Resolved by milestone 1.* TabICLv2 is BSD-3 and free for commercial use ([repo](https://github.com/soda-inria/tabicl)), and it is used as tier 1. On Titanic it beat trained gradient boosting (balanced accuracy 0.808 vs 0.793). TabPFN stays excluded. The original question was: the strongest tabular foundation model's open weights are non-commercial ([Prior Labs](https://docs.priorlabs.ai/models)). Which permissively licensed alternatives are good enough? Does the product's own license allow commercial users? Validate via a license review and a benchmark.
+- [x] **Teacher LLM cost:** the user brings their own key or runs an open-weight teacher locally, so the operator pays nothing. For the terms, see the resolved item above.
+- [ ] **Differentiation vs distil labs and Plexe** (**needs:** user interviews, which can't be done from here): is local-first plus free compute plus any-data enough of an edge, or do we need a sharper wedge such as browser-runnable models? Validate via a competitive teardown and user interviews.
+- [x] **Minimum data.** *Resolved for milestone 1:* the tool warns below 50 rows or below 10 per class, and refuses fewer than 2 per class (or fewer than 10 rows for regression). The upper size limit is still unmeasured: TabICL took about 2 min on CPU for 891 rows. Benchmark larger tables before launch.
+- [ ] **Interface.** The CLI shipped in milestone 1. Agent (MCP) and local web UI are still open. **Needs:** prototype tests with 5+ target users.
+- [x] **Product name.** *Resolved 2026-10-03:* **pocketml** (free on PyPI at the time). Package and CLI renamed. The repo name `no-code-ml` can be renamed on GitHub later.
+- [x] **Baseline.** *Resolved:* started fresh as a local CLI. The Copilot branch was reference only.
 
 ## Risks
 | Risk | Likelihood | Impact | Mitigation |

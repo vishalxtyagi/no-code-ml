@@ -1,9 +1,9 @@
-# No-Code ML
+# pocketml
 
 Point it at a table or text dataset and get a model you own, trained on your own machine. Before it shows any score, it tells you when that score would be lying.
 
 ```
-nocodeml train customers.csv --target churned
+pocketml train customers.csv --target churned
 ```
 
 The output of each run:
@@ -27,12 +27,12 @@ pip install -e .         # lighter: tiers 0 and 2 only
 ## Use
 
 ```
-nocodeml train data.csv --target COLUMN                 # CSV, XLSX or Parquet
-nocodeml train data.csv --target COLUMN --keep COL      # keep a column a check excluded
-nocodeml predict runs/<run-id> new_rows.csv --out preds.csv
+pocketml train data.csv --target COLUMN                 # CSV, XLSX or Parquet
+pocketml train data.csv --target COLUMN --keep COL      # keep a column a check excluded
+pocketml predict runs/<run-id> new_rows.csv --out preds.csv
 ```
 
-The zero-training tier is slow on CPU. Set `NOCODEML_SKIP_FM=1` to skip it.
+The zero-training tier is slow on CPU. Set `POCKETML_SKIP_FM=1` to skip it.
 
 `model.joblib` is a pickle. Only load runs you created yourself.
 

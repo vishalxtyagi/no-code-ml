@@ -7,12 +7,12 @@ import pandas as pd
 import pytest
 from sklearn.datasets import make_classification, make_regression
 
-from nocodeml import core
+from pocketml import core
 
 
 @pytest.fixture(autouse=True)
 def _skip_fm(monkeypatch):
-    monkeypatch.setenv("NOCODEML_SKIP_FM", "1")  # inherited by CLI subprocesses too
+    monkeypatch.setenv("POCKETML_SKIP_FM", "1")  # inherited by CLI subprocesses too
 
 
 def _clf_df(n=300, seed=0, weights=None):
@@ -108,19 +108,19 @@ def test_text_classification():
 
 
 def test_zero_training_tier_reports_skip_or_runs(monkeypatch):
-    monkeypatch.delenv("NOCODEML_SKIP_FM")
+    monkeypatch.delenv("POCKETML_SKIP_FM")
     report, _ = core.evaluate(_clf_df(n=150), "label")
     tier1 = next(c for c in report["candidates"] if c["tier"] == 1)
     try:
         import tabicl  # noqa: F401
     except ImportError:
-        assert tier1["status"] == "skipped" and "nocodeml[fm]" in tier1["skip_reason"]
+        assert tier1["status"] == "skipped" and "pocketml[fm]" in tier1["skip_reason"]
     else:
         assert tier1["status"] == "ok", tier1["skip_reason"]
 
 
 def _cli(*args, cwd):
-    return subprocess.run([sys.executable, "-m", "nocodeml.cli", *args], cwd=cwd, capture_output=True, text=True)
+    return subprocess.run([sys.executable, "-m", "pocketml.cli", *args], cwd=cwd, capture_output=True, text=True)
 
 
 def test_cli_train_predict_and_concurrency(tmp_path):
@@ -128,7 +128,7 @@ def test_cli_train_predict_and_concurrency(tmp_path):
     X, y = make_regression(n_samples=200, n_features=4, random_state=2)
     pd.DataFrame(X, columns=list("wxyz")).assign(t=y).to_csv(tmp_path / "b.csv", index=False)
 
-    procs = [subprocess.Popen([sys.executable, "-m", "nocodeml.cli", "train", f, "--target", t, "--out", "runs"],
+    procs = [subprocess.Popen([sys.executable, "-m", "pocketml.cli", "train", f, "--target", t, "--out", "runs"],
                               cwd=tmp_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
              for f, t in (("a.csv", "label"), ("b.csv", "t"))]
     for pr in procs:

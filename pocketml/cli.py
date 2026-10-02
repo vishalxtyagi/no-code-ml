@@ -1,11 +1,11 @@
 import argparse
 import sys
 
-from nocodeml import core
+from pocketml import core
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="nocodeml", description="Validated models from your data, on your machine.")
+    p = argparse.ArgumentParser(prog="pocketml", description="Validated models from your data, on your machine.")
     sub = p.add_subparsers(dest="cmd", required=True)
     t = sub.add_parser("train", help="check the data, compare model tiers, save the winner")
     t.add_argument("data")

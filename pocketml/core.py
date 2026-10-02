@@ -18,7 +18,7 @@ from sklearn.model_selection import KFold, StratifiedKFold, cross_validate
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, OrdinalEncoder, StandardScaler
 
-from nocodeml.checks import run_checks
+from pocketml.checks import run_checks
 
 NULLS = ["?", "NA", "N/A", "na", "n/a", "null", "NULL", "none", "None", ""]
 METRICS = {
@@ -107,7 +107,7 @@ def _text_pipeline(num, cat, text, task):
 
 def _zero_training(num, cat, task):
     """Tier 1: a tabular foundation model that predicts in-context, no gradient training. Optional extra."""
-    if os.environ.get("NOCODEML_SKIP_FM"):  # slow on CPU; tests and impatient users can opt out
+    if os.environ.get("POCKETML_SKIP_FM"):  # slow on CPU; tests and impatient users can opt out
         return None
     try:
         from tabicl import TabICLClassifier, TabICLRegressor
@@ -132,7 +132,7 @@ def build_candidates(kinds, features, task):
         fm = _zero_training(num, cat, task)
         note = " (non-text columns only)" if text else ""
         cands.append({"tier": 1, "name": f"zero-training foundation model (TabICL){note}", "model": fm,
-                      "skip_reason": None if fm else "not installed: pip install 'nocodeml[fm]'"})
+                      "skip_reason": None if fm else "not installed: pip install 'pocketml[fm]'"})
     else:
         cands.append({"tier": 1, "name": "zero-training model", "model": None,
                       "skip_reason": "text-only data: zero-training text models arrive in milestone 2"})

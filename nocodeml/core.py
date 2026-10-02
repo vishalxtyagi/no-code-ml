@@ -1,5 +1,6 @@
 """Load data, compare model tiers under cross-validation, pick a winner, save the run."""
 import json
+import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -106,6 +107,8 @@ def _text_pipeline(num, cat, text, task):
 
 def _zero_training(num, cat, task):
     """Tier 1: a tabular foundation model that predicts in-context, no gradient training. Optional extra."""
+    if os.environ.get("NOCODEML_SKIP_FM"):  # slow on CPU; tests and impatient users can opt out
+        return None
     try:
         from tabicl import TabICLClassifier, TabICLRegressor
     except ImportError:

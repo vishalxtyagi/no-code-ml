@@ -11,7 +11,7 @@
 ## Preconditions (checked 2026-10-03)
 - [x] Working tree clean apart from the untracked `.claude/`
 - [x] `ECC_HOOK_PROFILE`, `ECC_DISABLED_HOOKS` and `ECC_GATEGUARD` are unset, so hooks are active
-- [ ] **Tests pass.** `main` has no tests, so iteration 1 must create a runnable test command, and every later iteration is gated on it.
+- [x] **Tests pass.** `main` has no tests, so iteration 1 must create a runnable test command, and every later iteration is gated on it.
 
 ## Iteration contract (each pass)
 1. Read this runbook and the PRD. Pick the next unchecked step from `.claude/plans/m1-core.plan.md`.
@@ -40,3 +40,5 @@
 ## Log
 | # | Step | Result | Commit |
 |---|---|---|---|
+| 1 | Steps 0–6: package, checks, tiers, CLI, concurrency (11 tests green) | pass | 0db195d |
+| 2 | Step 7: removed Flask app, README; test-time TabICL opt-out (suite 7.7 min → ~1 min); Titanic check: PassengerId/Name excluded as IDs, TabICL (zero-training) won 0.808 vs GB 0.793 balanced acc | pass | (this commit) |

@@ -1,81 +1,54 @@
 # No-Code ML
 
-Welcome to the No-Code ML project repository! This project aims to provide a simplified way to apply machine learning techniques without the need for extensive coding. With this project, you can quickly experiment with machine learning models and explore their capabilities.
-
-## Installation
-
-To use this project, follow the steps below:
-
-1. Clone the repository to your local machine using the following command:
+Point it at a table or text dataset and get a model you own, trained on your own machine. Before it shows any score, it tells you when that score would be lying.
 
 ```
-git clone https://github.com/vishalxtyagi/no-code-ml
+nocodeml train customers.csv --target churned
 ```
 
-2. Navigate to the cloned repository directory:
+The output of each run:
+
+1. **Validity checks**, run before any score. Columns that leak the target, ID columns and date columns are excluded with a reason. You also get warnings for class imbalance, too little data, conflicting duplicate rows and rows with no target.
+2. **Three model tiers**, compared under the same cross-validation:
+   - **Tier 0 (floor):** always predicts the most common or mean value. Every other score is judged against it.
+   - **Tier 1 (zero training):** a tabular foundation model ([TabICL](https://github.com/soda-inria/tabicl)) that predicts with no training.
+   - **Tier 2 (cheap training):** gradient boosting for tables, or TF-IDF plus a linear model when the data has text columns.
+
+   A trained model only wins if it beats the zero-training model by more than its own cross-validation noise.
+3. **A run folder** at `runs/<timestamp>-<id>/` containing `report.md`, `report.json` and `model.joblib`. Each run gets its own folder, so several runs can happen at the same time.
+
+## Install
 
 ```
-cd no-code-ml
+pip install -e ".[fm]"   # [fm] adds the zero-training tier (pulls in CPU torch)
+pip install -e .         # lighter: tiers 0 and 2 only
 ```
 
-3. Create a Python virtual environment named 'venv':
+## Use
 
 ```
-py -m venv venv
+nocodeml train data.csv --target COLUMN                 # CSV, XLSX or Parquet
+nocodeml train data.csv --target COLUMN --keep COL      # keep a column a check excluded
+nocodeml predict runs/<run-id> new_rows.csv --out preds.csv
 ```
 
-4. Activate the virtual environment:
+The zero-training tier is slow on CPU. Set `NOCODEML_SKIP_FM=1` to skip it.
+
+`model.joblib` is a pickle. Only load runs you created yourself.
+
+## Develop
 
 ```
-venv\Scripts\activate
+pip install -e ".[dev,fm]"
+python -m pytest -q
 ```
 
-5. Install the required dependencies from the 'requirements.txt' file:
-
-```
-pip install -r requirements.txt
-```
-
-## Usage
-
-After completing the installation steps, you can run the main script using the following command:
-
-```
-python main.py
-```
-
-This will launch the No-Code ML application, where you can interactively experiment with machine learning models.
-
-## Contributing
-
-We welcome contributions to improve the No-Code ML project. If you would like to contribute, please follow these guidelines:
-
-1. Fork the repository and create your branch:
-
-```
-git checkout -b my-feature
-```
-
-2. Implement your changes and ensure they are well-documented.
-
-3. Commit your changes with a descriptive commit message:
-
-```
-git commit -m "Add my feature"
-```
-
-4. Push your changes to your forked repository:
-
-```
-git push origin my-feature
-```
-
-5. Open a pull request, describing your changes and their purpose.
+The roadmap lives in `.claude/prds/no-code-ml-v2.prd.md`. Next up is "replace my LLM prompt with a small model" (milestone 2).
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+MIT
 
 ## Contact
 
-If you have any questions or suggestions regarding this project, feel free to reach out to the project maintainer at [vishaltyagi.9468@gmail.com](mailto:vishaltyagi.9468@gmail.com).
+[vishaltyagi.9468@gmail.com](mailto:vishaltyagi.9468@gmail.com)

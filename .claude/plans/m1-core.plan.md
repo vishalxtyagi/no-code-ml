@@ -73,14 +73,14 @@ A local Python package plus CLI. Each run is a separate process writing to its o
 - **Modify:** `README.md` with install, train and predict instructions (short). Also `.gitignore` to add `runs/` and `.venv/`.
 
 ## Steps (loop checklist → copy to `.claude/plans/m1-core.plan.md`)
-- [ ] 0. Create branch `loop/m1-core`. Copy this plan into `.claude/plans/m1-core.plan.md`. Add `pyproject.toml` and an empty package. Get `python -m pytest -q` green with one smoke test.
-- [ ] 1. `load` and `detect_task`, plus tests: a CSV round-trip, null placeholders becoming NaN, and classification vs regression detection.
-- [ ] 2. `checks.py`, plus tests on synthetic data: a planted leak column is excluded, an ID column is excluded, imbalance is flagged, a tiny dataset is flagged, and conflicting duplicates are counted.
-- [ ] 3. Tiers 0 and 2 plus CV evaluation and the selection rule. Tests: regression via `make_regression` and classification via `make_classification` both beat the dummy; a text dataset (inline synthetic sentences) works.
-- [ ] 4. Tier 1 TabICL behind `[fm]`. Test with `pytest.importorskip("tabicl")`. Without the extra, the report shows "skipped".
-- [ ] 5. `save` and the CLI `train`/`predict`. Tests: an end-to-end subprocess run writes the three artifacts, and `predict` returns one prediction per row.
-- [ ] 6. Concurrency test: two `train` subprocesses on different datasets in parallel both succeed, with separate run dirs and correct reports.
-- [ ] 7. Delete the old Flask app, update the README and `.gitignore`. Full suite green.
+- [x] 0. Create branch `loop/m1-core`. Copy this plan into `.claude/plans/m1-core.plan.md`. Add `pyproject.toml` and an empty package. Get `python -m pytest -q` green with one smoke test.
+- [x] 1. `load` and `detect_task`, plus tests: a CSV round-trip, null placeholders becoming NaN, and classification vs regression detection.
+- [x] 2. `checks.py`, plus tests on synthetic data: a planted leak column is excluded, an ID column is excluded, imbalance is flagged, a tiny dataset is flagged, and conflicting duplicates are counted.
+- [x] 3. Tiers 0 and 2 plus CV evaluation and the selection rule. Tests: regression via `make_regression` and classification via `make_classification` both beat the dummy; a text dataset (inline synthetic sentences) works.
+- [x] 4. Tier 1 TabICL behind `[fm]`. Test with `pytest.importorskip("tabicl")`. Without the extra, the report shows "skipped".
+- [x] 5. `save` and the CLI `train`/`predict`. Tests: an end-to-end subprocess run writes the three artifacts, and `predict` returns one prediction per row.
+- [x] 6. Concurrency test: two `train` subprocesses on different datasets in parallel both succeed, with separate run dirs and correct reports.
+- [x] 7. Delete the old Flask app, update the README and `.gitignore`. Full suite green.
 
 ## Verification
 - `python -m venv .venv && .venv/bin/pip install -e ".[dev,fm]" && .venv/bin/python -m pytest -q`

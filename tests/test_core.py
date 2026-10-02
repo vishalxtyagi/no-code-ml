@@ -10,6 +10,11 @@ from sklearn.datasets import make_classification, make_regression
 from nocodeml import core
 
 
+@pytest.fixture(autouse=True)
+def _skip_fm(monkeypatch):
+    monkeypatch.setenv("NOCODEML_SKIP_FM", "1")  # inherited by CLI subprocesses too
+
+
 def _clf_df(n=300, seed=0, weights=None):
     X, y = make_classification(n_samples=n, n_features=6, n_informative=4, random_state=seed, weights=weights)
     df = pd.DataFrame(X, columns=[f"f{i}" for i in range(6)])
@@ -102,7 +107,8 @@ def test_text_classification():
     assert report["winner"]["tier"] == 2 and _score(report, 2, "balanced_accuracy") > 0.9
 
 
-def test_zero_training_tier_reports_skip_or_runs():
+def test_zero_training_tier_reports_skip_or_runs(monkeypatch):
+    monkeypatch.delenv("NOCODEML_SKIP_FM")
     report, _ = core.evaluate(_clf_df(n=150), "label")
     tier1 = next(c for c in report["candidates"] if c["tier"] == 1)
     try:
